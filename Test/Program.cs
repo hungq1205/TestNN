@@ -10,27 +10,29 @@ namespace Test
         static void Main(string[] args)
         {
             DenseNeuralNetwork network = new DenseNeuralNetwork(
-                1,
-                1,
-                1
+                3,
+                new ActivationLayer(5, ActivationFunc.Tanh),
+                new ActivationLayer(4, ActivationFunc.Tanh),
+                new ActivationLayer(4, ActivationFunc.Tanh),
+                new ActivationLayer(3, ActivationFunc.Sigmoid)
                 );
 
             DenseNNForwardResult result;
 
             double[] inputs =
             {
-                1
+                100, 5, 10
             };
 
             double[] desiredOutputs =
             {
-                2
+                0, 1, 0
             };
 
             network.BiasAssignForEach(RandomDouble);
             network.WeightAssignForEach(RandomDouble);
 
-            for (int epoch = 0; epoch < 2; epoch++)
+            for (int epoch = 0; epoch < 1000; epoch++)
             {
                 Console.WriteLine(epoch + 1 + " run: ");
                 Console.WriteLine("Network: ");
@@ -39,6 +41,13 @@ namespace Test
                 LogOutput(result);
                 network.GradientDescent(desiredOutputs, result, 0.01);
                 Console.WriteLine();
+
+                //double error = 0;
+                //for (int i = 0; i < desiredOutputs.LongLength; i++)
+                //    error += Math.Pow(desiredOutputs[i] - result.outputs[i], 2);
+
+                //if (error < 0.0001)
+                //    break;
             }
 
             Console.ReadKey();
@@ -86,8 +95,8 @@ namespace Test
 
         static double RandomDouble()
         {
-            return rand.Next(1, 3);
-            //return (rand.NextDouble() - 0.5d) * 0.1d;
+            //return rand.Next(1, 3);
+            return (rand.NextDouble() - 0.5d) * 0.1d;
         }
     }
 }

@@ -9,30 +9,35 @@ namespace Test
 
         static void Main(string[] args)
         {
-            DenseNeuralNetwork network = new DenseNeuralNetwork(2, 3, 3, 2);
+            DenseNeuralNetwork network = new DenseNeuralNetwork(
+                1,
+                1,
+                1
+                );
+
             DenseNNForwardResult result;
 
             double[] inputs =
             {
-                2, 1
+                1
             };
 
             double[] desiredOutputs =
             {
-                0.5, 1
+                2
             };
 
             network.BiasAssignForEach(RandomDouble);
             network.WeightAssignForEach(RandomDouble);
 
-            for (int epoch = 0; epoch < 100; epoch++)
+            for (int epoch = 0; epoch < 2; epoch++)
             {
                 Console.WriteLine(epoch + 1 + " run: ");
                 Console.WriteLine("Network: ");
                 Console.Write(ToString(network));
                 result = network.Forward(inputs);
                 LogOutput(result);
-                network.GradientDescent(desiredOutputs, result, 0.2);
+                network.GradientDescent(desiredOutputs, result, 0.01);
                 Console.WriteLine();
             }
 
@@ -60,7 +65,7 @@ namespace Test
                 sb.Append(network.layers[first].biases[j] + "\t");
             sb.AppendLine();
 
-            for (int i = 1; i < network.layers.Length - 1; i++)
+            for (int i = 1; i < network.layers.Length; i++)
             {
                 sb.AppendLine("Weight " + i + ": ");
                 for (int j = 0; j < network.weights[i - 1].matrix.GetLength(0); j++)
@@ -76,23 +81,13 @@ namespace Test
                 sb.AppendLine();
             }
 
-            int last = network.layers.Length - 1;
-
-            sb.AppendLine("Weight " + last + ": ");
-            for (int j = 0; j < network.weights[last - 1].matrix.GetLength(0); j++)
-            {
-                for (int k = 0; k < network.weights[last - 1].matrix.GetLength(1); k++)
-                    sb.Append(network.weights[last - 1].matrix[j, k] + "\t");
-                sb.AppendLine();
-            }
-
             return sb.ToString();
         }
 
         static double RandomDouble()
         {
-            //return rand.Next(0, 1);
-            return rand.NextDouble();
+            return rand.Next(1, 3);
+            //return (rand.NextDouble() - 0.5d) * 0.1d;
         }
     }
 }

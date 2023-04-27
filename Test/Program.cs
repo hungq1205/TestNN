@@ -11,14 +11,14 @@ namespace Test
         {
             DenseNeuralNetwork network = new DenseNeuralNetwork(
                 3,
-                new ActivationLayer(3, ActivationFunc.NaturalLog, false),
+                new ForwardLayer(3, ActivationFunc.NaturalLog, false),
                 new ActivationLayer(5, ActivationFunc.Tanh),
                 new ActivationLayer(4, ActivationFunc.Tanh),
                 new ActivationLayer(3, ActivationFunc.Tanh),
                 //new ActivationLayer(5, ActivationFunc.Sigmoid),
                 //new ActivationLayer(4, ActivationFunc.Sigmoid),
                 //new ActivationLayer(3, ActivationFunc.Sigmoid),
-                new ActivationLayer(3, ActivationFunc.Exponential, false),
+                new ForwardLayer(3, ActivationFunc.Exponential, false),
                 4
                 );
 

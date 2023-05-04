@@ -1,4 +1,6 @@
 ﻿using BFLib.AI;
+using System;
+using System.Reflection;
 using System.Text;
 
 namespace Test
@@ -10,28 +12,39 @@ namespace Test
         static void Main(string[] args)
         {
             DenseNeuralNetwork network = new DenseNeuralNetwork(
+                //new ActivationLayer(3, ActivationFunc.Tanh),
+                //new BatchNormLayer(3, ForwardLayer.ForwardPort.In),
                 3,
-                new ForwardLayer(3, ActivationFunc.NaturalLog, false),
-                new ActivationLayer(5, ActivationFunc.Tanh),
-                new ActivationLayer(4, ActivationFunc.Tanh),
+                new BatchNormLayer(3, ForwardLayer.ForwardPort.In),
+                new BatchNormLayer(3, ForwardLayer.ForwardPort.Out),
                 new ActivationLayer(3, ActivationFunc.Tanh),
-                //new ActivationLayer(5, ActivationFunc.Sigmoid),
-                //new ActivationLayer(4, ActivationFunc.Sigmoid),
-                //new ActivationLayer(3, ActivationFunc.Sigmoid),
-                new ForwardLayer(3, ActivationFunc.Exponential, false),
+                new BatchNormLayer(3, ForwardLayer.ForwardPort.Out),
+                new ActivationLayer(3, ActivationFunc.Sigmoid),
+                new BatchNormLayer(3, ForwardLayer.ForwardPort.Out),
+                new ActivationLayer(3, ActivationFunc.Sigmoid),
+                new BatchNormLayer(3, ForwardLayer.ForwardPort.Out),
+                new ActivationLayer(3, ActivationFunc.Tanh),
                 4
                 );
 
             DenseNNForwardResult result;
 
-            double[] inputs =
+            double[][] inputs =
             {
-                10000, 5, 500
+                new double[] { 1, 0.5, 0.6 },
+                new double[] { 0.8, 0.4, 0.4 },
+                new double[] { 0.8, 0.4, 0.6 },
+                new double[] { 1, 0.4, 0.4 },
+                new double[] { 0.8, 0.5, 0.6 }
             };
 
-            double[] desiredOutputs =
+            double[][] desiredOutputs =
             {
-                20, -100, 100, 0
+                new double[] { 0.2, -0.9, 0.3, 0 },
+                new double[] { 0.1, -0.5, 0.7, 0 },
+                new double[] { 0.1, -0.5, 0.3, 0 },
+                new double[] { 0.2, -0.5, 0.7, 0 },
+                new double[] { 0.1, -0.9, 0.3, 0 }
             };
 
             network.BiasAssignForEach(RandomDouble);
@@ -39,33 +52,104 @@ namespace Test
 
             for (int epoch = 0; epoch < 1000; epoch++)
             {
-                Console.WriteLine(epoch + 1 + " run: ");
-                // Console.WriteLine("Network: ");
-                // Console.Write(ToString(network));
-                result = network.Forward(inputs);
-                LogOutput(result);
-                network.GradientDescent(desiredOutputs, result, 0.05);
-                Console.WriteLine();
+                int[] sampleIndexes = SampleIndex(0, inputs.Length, 2);
+                double[,] sampleOutputs = Sample(desiredOutputs, sampleIndexes);
 
-                double error = 0;
-                for (int i = 0; i < desiredOutputs.LongLength; i++)
-                    error += Math.Pow(desiredOutputs[i] - result.outputs[i], 2);
+                result = network.Forward(Sample(inputs, sampleIndexes));
+                network.GradientDescent(sampleOutputs, result, 0.01);
 
-                if (error < 0.001 / (desiredOutputs.Length * desiredOutputs.Length))
-                    break;
+                if ((epoch + 1) % 10 == 0 || epoch == 0)
+                {
+                    Console.WriteLine(epoch + 1 + " run: ");
+                    Console.Write(LogBatchNorm(network));
+                    // Console.WriteLine("Network: ");
+                    // Console.Write(ToString(network));
+                    // LogOutput(result);
+
+                    double error = 0;
+                    for (int i = 0; i < sampleOutputs.GetLength(0); i++)
+                        for (int j = 0; j < sampleOutputs.GetLength(1); j++)
+                            error += Math.Pow(sampleOutputs[i, j] - result.outputs[i, j], 2);
+
+                    Console.WriteLine();
+                    Console.WriteLine("Error: " + error);
+                    Console.WriteLine();
+                    if (error < 0.001 / (sampleOutputs.Length * sampleOutputs.Length))
+                        break;
+                }
+
+                //Console.WriteLine(epoch + 1 + " run: ");
+                //Console.WriteLine("Network: ");
+                //Console.Write(ToString(network));
+                //LogOutput(result);
+                //Console.WriteLine();
+
+                //double error = 0;
+                //for (int i = 0; i < sampleOutputs.GetLength(0); i++)
+                //    for (int j = 0; j < sampleOutputs.GetLength(1); j++)
+                //        error += Math.Pow(sampleOutputs[i, j] - result.outputs[i, j], 2);
+
+                //if (error < 0.001 / (sampleOutputs.Length * sampleOutputs.Length))
+                //    break;
+                //Console.WriteLine("Error: " + error);
             }
 
             Console.ReadKey();
         }
 
+        static int[] SampleIndex(int min, int max, int batchSize)
+        {
+            int[] result = new int[batchSize];
+            int currentIndex = min;
+
+            for (int randCount = 0; randCount < batchSize; randCount++) {
+                currentIndex += rand.Next(currentIndex, max); // random false
+                result[randCount] = currentIndex; 
+            }
+
+            return result;
+        } 
+
+        static double[,] Sample(double[][] population, params int[] indexes)
+        {
+            double[,] batch = new double[indexes.Length, population[0].Length];
+
+            for(int index  = 0; index < indexes.Length; index++)
+                for(int i = 0; i < population[index].Length; i++)
+                    batch[index, i] = population[index][i];
+
+            return batch;
+        }
+
+        static double[,] Sample(double[][] population, int batchSize)
+        {
+            double[,] batch = new double[batchSize, population[0].Length];
+
+            int currentIndex = 0;
+            for(int randCount = 0; randCount < batchSize; randCount++)
+            {
+                currentIndex += rand.Next(currentIndex, population.Length); // random false 
+
+                for (int i = 0; i < population[currentIndex].Length; i++)
+                    batch[currentIndex, i] = population[currentIndex][i];
+            }
+
+            return batch;
+        }
+
         static void LogOutput(DenseNNForwardResult result)
         {
-            double[] outputs = result.outputs;
+            double[,] outputs = result.outputs;
 
-            Console.Write("out: \n" + outputs[0]);
-            for (int i = 1; i < outputs.Length; i++)
-                Console.Write(" : " + outputs[i]);
-            Console.WriteLine();
+            for (int i = 0; i < outputs.GetLength(0); i++)
+            {
+                Console.Write(outputs[i, 0]);
+
+                for (int j = 1; j < outputs.GetLength(1); j++)
+                    Console.Write(" : " + outputs[i, j]);
+
+                Console.WriteLine();
+            }
         }
 
         static string ToString(DenseNeuralNetwork network)
@@ -93,6 +177,28 @@ namespace Test
                 for (int j = 0; j < network.layers[i].dim; j++)
                     sb.Append(network.layers[i].GetBias(j) + "\t");
                 sb.AppendLine();
+                if(network.layers[i] is BatchNormLayer)
+                {
+                    sb.Append(String.Format("Gamma: {0}\t Beta: {1}", ((BatchNormLayer)network.layers[i]).gamma, ((BatchNormLayer)network.layers[i]).beta));
+                    sb.AppendLine();
+                }
+            }
+
+            return sb.ToString();
+        }
+
+        static string LogBatchNorm(DenseNeuralNetwork network)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            for (int i = 1; i < network.layers.Length; i++)
+            {
+                if(network.layers[i] is BatchNormLayer)
+                {
+                    sb.Append("Layer " + (i + 1) + ": ");
+                    sb.Append(String.Format("Gamma: {0}\t Beta: {1}", ((BatchNormLayer)network.layers[i]).gamma, ((BatchNormLayer)network.layers[i]).beta));
+                    sb.AppendLine();
+                }
             }
 
             return sb.ToString();

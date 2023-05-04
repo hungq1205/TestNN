@@ -7,6 +7,8 @@ namespace Test
 {
     internal class Program
     {
+        public const int BATCH_SIZE = 3;
+
         static Random rand = new Random();
 
         static void Main(string[] args)
@@ -52,11 +54,11 @@ namespace Test
 
             for (int epoch = 0; epoch < 1000; epoch++)
             {
-                int[] sampleIndexes = SampleIndex(0, inputs.Length, 2);
+                int[] sampleIndexes = SampleIndex(0, inputs.Length, BATCH_SIZE);
                 double[,] sampleOutputs = Sample(desiredOutputs, sampleIndexes);
 
                 result = network.Forward(Sample(inputs, sampleIndexes));
-                network.GradientDescent(sampleOutputs, result, 0.01);
+                network.GradientDescent(sampleOutputs, result, 0.05 / BATCH_SIZE);
 
                 if ((epoch + 1) % 10 == 0 || epoch == 0)
                 {
@@ -103,7 +105,7 @@ namespace Test
             int currentIndex = min;
 
             for (int randCount = 0; randCount < batchSize; randCount++) {
-                currentIndex += rand.Next(currentIndex, max); // random false
+                currentIndex = rand.Next(currentIndex, max); // random false
                 result[randCount] = currentIndex; 
             }
 

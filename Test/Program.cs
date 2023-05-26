@@ -16,23 +16,26 @@ namespace Test
 
         static void Main(string[] args)
         {
-            //DenseNeuralNetwork network = new DenseNeuralNetwork(
-            //    //new ActivationLayer(3, ActivationFunc.Tanh),
-            //    //new BatchNormLayer(3, ForwardLayer.ForwardPort.In),
-            //    2,
-            //    new BatchNormLayer(2, ForwardLayer.ForwardPort.In),
-            //    new ActivationLayer(3, ActivationFunc.Linear),
-            //    new BatchNormLayer(3, ForwardLayer.ForwardPort.In),
-            //    new ActivationLayer(3, ActivationFunc.Linear),
-            //    new BatchNormLayer(3, ForwardLayer.ForwardPort.In),
-            //    1
-            //    );
+            DenseNeuralNetworkBuilder builder = new DenseNeuralNetworkBuilder(2);
+            builder.NewLayers(
+                //new ActivationLayer(3, ActivationFunc.Tanh),
+                //new BatchNormLayer(3, ForwardLayer.ForwardPort.In),
+                new BatchNormLayer(ForwardLayer.ForwardPort.In),
+                new ActivationLayer(3, ActivationFunc.Linear),
+                new BatchNormLayer(ForwardLayer.ForwardPort.In),
+                new ActivationLayer(3, ActivationFunc.Linear),
+                new BatchNormLayer(ForwardLayer.ForwardPort.In),
+                1
+                );
 
-            RecurrentNeuralNetwork network = new RecurrentNeuralNetwork(3, 1, 1);
+            Optimizer optimizer = new AdaGrad(0);
+            DenseNeuralNetwork network = new DenseNeuralNetwork(builder, optimizer);
 
-            string[] cats = UData.GetCategoriesFromCSV(@"C:\Users\mAy tInH 2 mAn HiNh\Documents\datasets\realtor-data.csv");
-            Dictionary<string, AdditionNumericDataInfo> inputInfos, outputInfos;
-            DistinctIntDataInfo[] distinctInfos;
+            //RecurrentNeuralNetwork network = new RecurrentNeuralNetwork(3, 1, 1);
+
+            //string[] cats = UData.GetCategoriesFromCSV(@"C:\Users\mAy tInH 2 mAn HiNh\Documents\datasets\realtor-data.csv");
+            //Dictionary<string, AdditionNumericDataInfo> inputInfos, outputInfos;
+            //DistinctIntDataInfo[] distinctInfos;
             //UDataInfo info = new UDataInfo(
             //    new string[]
             //    {
@@ -56,49 +59,39 @@ namespace Test
             //Dictionary<string, double>[] inputs = UData.RetrieveNumberDataFromCSV(@"C:\Users\mAy tInH 2 mAn HiNh\Documents\datasets\realtor-data.csv", 5000, out inputInfos, "bed", "house_size");
             //Dictionary<string, double>[] desiredOutputs = UData.RetrieveNumberDataFromCSV(@"C:\Users\mAy tInH 2 mAn HiNh\Documents\datasets\realtor-data.csv", 5000, out outputInfos, "price");
 
-            //dataLength = inputs.Length;
-
             ForwardResult result;
 
-            double[][][] inputs =
+            double[][] inputs =
             {
-                new double[][] { new double[] { 0.25 }, new double[] { 0.75 }, new double[] { 0.5 } },
-                new double[][] { new double[] { 0.75 }, new double[] { 0.5 }, new double[] { 1 } },
-                new double[][] { new double[] { 0.5 }, new double[] { 1 }, new double[] { 0.25 } },
-                new double[][] { new double[] { 1 }, new double[] { 0.25 }, new double[] { 0.75 } }
             };
 
             double[][] desiredOutputs =
             {
-                new double[] { 1 },
-                new double[] { 0.25 },
-                new double[] { 0.75 },
-                new double[] { 0.5 }
             };
+
+            dataLength = inputs.Length;
 
             network.BiasAssignForEach(RandomDouble);
             network.WeightAssignForEach(RandomDouble);
 
-            dataLength = inputs.Length;
-
-            for (int epoch = 0; epoch < 100000; epoch++)
+            for (int epoch = 0; epoch < 50; epoch++)
             {
                 int[] sampleIndexes = SampleIndex(0, dataLength, BATCH_SIZE);
-                //int[] sampleIndexes = SampleIndex(0, dataLength, BATCH_SIZE);
                 //double[][] sampleOutputs = ToDoubleArrays(Sample(desiredOutputs, sampleIndexes), outputInfos);
-                
-                result = network.Forward(Sample(inputs, sampleIndexes));
 
                 double[][] sampleOutputs = new double[sampleIndexes.Length][];
                 for (int i = 0; i < sampleIndexes.Length; i++)
                     sampleOutputs[i] = desiredOutputs[sampleIndexes[i]];
-                network.GradientDescent(sampleOutputs, result, 0.05 / BATCH_SIZE);
 
-                if ((epoch + 1) % 1000 == 0 || epoch == 0)
+                result = network.Forward(Sample(inputs, sampleIndexes));
+
+                network.GradientDescent(sampleOutputs, result);
+
+                if ((epoch + 1) % 1 == 0 || epoch == 0)
                 {
                     Console.WriteLine(epoch + 1 + " run: ");
                     // Console.Write(LogBatchNorm(network));
-                    // Console.Write(ToString(network));
+                     Console.Write(ToString(network));
                     // Console.WriteLine(NonForwardToString(network));
                     // LogOutput(result);
                     LogCompareOutput(result, sampleOutputs);
@@ -129,7 +122,7 @@ namespace Test
                         sampleOutputs[i] = desiredOutputs[sampleIndexes[i]];
 
                     result = network.Forward(Sample(inputs, sampleIndexes));
-                    network.GradientDescent(sampleOutputs, result, 0.05 / BATCH_SIZE);
+                    network.GradientDescent(sampleOutputs, result);
 
                     if ((epoch + 1) % 1 == 0 || epoch == 0)
                     {
@@ -189,32 +182,32 @@ namespace Test
             return result.ToArray();
         }
 
-        static ForwardInput[] Sample(double[][][] population, params int[] indexes)
+        //static IForwardInput[] Sample(double[][][] population, params int[] indexes)
+        //{
+        //    IForwardInput[] batch = new IForwardInput[indexes.Length];
+
+        //    for(int i = 0; i < indexes.Length; i++)
+        //        batch[i] = new IForwardInput(population[indexes[i]]);
+
+        //    return batch;
+        //}
+
+        //static IForwardInput[] Sample(double[][][] population, int batchSize)
+        //{
+        //    return Sample(population, SampleIndex(0, population.Length, batchSize));
+        //}
+
+        static IForwardInput[] Sample(double[][] population, params int[] indexes)
         {
-            ForwardInput[] batch = new ForwardInput[indexes.Length];
+            IForwardInput[] batch = new IForwardInput[indexes.Length];
 
             for(int i = 0; i < indexes.Length; i++)
-                batch[i] = new ForwardInput(population[indexes[i]]);
+                batch[i] = new DenseForwardInput(population[indexes[i]]);
 
             return batch;
         }
 
-        static ForwardInput[] Sample(double[][][] population, int batchSize)
-        {
-            return Sample(population, SampleIndex(0, population.Length, batchSize));
-        }
-
-        static ForwardInput[] Sample(double[][] population, params int[] indexes)
-        {
-            ForwardInput[] batch = new ForwardInput[indexes.Length];
-
-            for(int i = 0; i < indexes.Length; i++)
-                batch[i] = new ForwardInput(population[indexes[i]]);
-
-            return batch;
-        }
-
-        static ForwardInput[] Sample(double[][] population, int batchSize)
+        static IForwardInput[] Sample(double[][] population, int batchSize)
         {
             return Sample(population, SampleIndex(0, population.Length, batchSize));
         }
@@ -392,7 +385,7 @@ namespace Test
             return sb.ToString();
         }
 
-        static string LogForwardLog(DenseNNForwardResult result, Layer[] layers)
+        static string LogForwardLog(DenseForwardResult result, Layer[] layers)
         {
             StringBuilder sb = new StringBuilder();
 
@@ -414,7 +407,7 @@ namespace Test
             return sb.ToString();
         }
 
-        static double RandomDouble()
+        static double RandomDouble(double value)
         {
             //return rand.Next(1, 3);
             //return (rand.Next(0, 2) * 2 - 1) * (rand.NextDouble() * 0.3d + 0.1d);

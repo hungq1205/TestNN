@@ -50,16 +50,16 @@ namespace Test
                 //new ActivationLayer(3, ActivationFunc.Tanh),
                 //new BatchNormLayer(3, ForwardLayer.ForwardPort.In),
                 //new BatchNormLayer(ForwardLayer.ForwardPort.In),
-                new ActivationLayer(5, ActivationFunc.Linear),
+                new ActivationLayer(12, ActivationFunc.Linear),
                 //new BatchNormLayer(ForwardLayer.ForwardPort.In),
-                new ActivationLayer(4, ActivationFunc.Linear),
+                //new ActivationLayer(6, ActivationFunc.Linear),
                 //new BatchNormLayer(ForwardLayer.ForwardPort.In),
                 new ActivationLayer(desiredOutputs[0].Length, ActivationFunc.Sigmoid)
                 );
 
-            Optimizer optimizer = new AdaDelta(0.9d);
-            // Optimizer optimizer = new AdaGrad(0.03d);
-            // Optimizer optimizer = new SGD(0.05d);
+            //Optimizer optimizer = new AdaDelta(0.9d);
+            //Optimizer optimizer = new AdaGrad(0.03d);
+            Optimizer optimizer = new SGD(0.03d);
             DenseNeuralNetwork network = new DenseNeuralNetwork(builder, optimizer);
 
             //RecurrentNeuralNetwork network = new RecurrentNeuralNetwork(3, 1, 1);
@@ -97,7 +97,7 @@ namespace Test
             network.BiasAssignForEach(RandomDouble);
             network.WeightAssignForEach(RandomDouble);
 
-            for (int epoch = 0; epoch < 100000; epoch++)
+            for (int epoch = 0; epoch < 1000000; epoch++)
             {
                 int[] sampleIndexes = SampleIndex(0, dataLength, BATCH_SIZE);
                 //double[][] sampleOutputs = ToDoubleArrays(Sample(desiredOutputs, sampleIndexes), outputInfos);
@@ -110,7 +110,7 @@ namespace Test
 
                 network.GradientDescent(sampleOutputs, result);
 
-                if ((epoch + 1) % 10000 == 0 || epoch == 0)
+                if ((epoch + 1) % 100000 == 0 || epoch == 0)
                 {
                     Console.WriteLine(epoch + 1 + " run: ");
                     // Console.Write(LogBatchNorm(network));
@@ -434,8 +434,8 @@ namespace Test
         static double RandomDouble(double value)
         {
             //return rand.Next(1, 3);
-            //return (rand.Next(0, 2) * 2 - 1) * (rand.NextDouble() * 0.3d + 0.1d);
-            return (rand.NextDouble() * 0.3d + 0.1d);
+            return (rand.Next(0, 2) * 2 - 1) * (rand.NextDouble() * 0.3d + 0.1d);
+            //return (rand.NextDouble() * 0.3d + 0.1d);
         }
     }
 }

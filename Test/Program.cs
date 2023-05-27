@@ -61,7 +61,9 @@ namespace Test
             //Optimizer optimizer = new SGD(0.03d);
             //Optimizer optimizer = new AdaGrad(0.1d);
             //Optimizer optimizer = new AdaDelta(0.9d);
-            Optimizer optimizer = new Momentum();
+            //Optimizer optimizer = new Momentum(0.9d, 0.01d);
+            //Optimizer optimizer = new RMSprop(0.99d);
+            Optimizer optimizer = new Adam(0.9d, 0.99d, 0.01d);
             DenseNeuralNetwork network = new DenseNeuralNetwork(builder, optimizer);
 
             //RecurrentNeuralNetwork network = new RecurrentNeuralNetwork(3, 1, 1);

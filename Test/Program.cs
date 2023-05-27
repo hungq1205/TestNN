@@ -57,7 +57,8 @@ namespace Test
                 new ActivationLayer(desiredOutputs[0].Length, ActivationFunc.Sigmoid)
                 );
 
-            Optimizer optimizer = new AdaGrad(0.03d);
+            Optimizer optimizer = new AdaDelta(0.9d);
+            // Optimizer optimizer = new AdaGrad(0.03d);
             // Optimizer optimizer = new SGD(0.05d);
             DenseNeuralNetwork network = new DenseNeuralNetwork(builder, optimizer);
 

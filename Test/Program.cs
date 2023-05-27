@@ -16,19 +16,49 @@ namespace Test
 
         static void Main(string[] args)
         {
-            DenseNeuralNetworkBuilder builder = new DenseNeuralNetworkBuilder(2);
+
+            double[][] inputs =
+            {
+                new double[] { 0, 1.00d, 0.4d, 1 },
+                new double[] { 1, 0.75d, 0.6d, 0 },
+                new double[] { 0, 0.50d, 0.8d, 0 },
+                new double[] { 1, 0.50d, 0.6d, 1 },
+                new double[] { 0, 0.25d, 0.8d, 1 },
+                new double[] { 1, 1.00d, 0.4d, 1 },
+                new double[] { 0, 0.50d, 0.6d, 1 },
+                new double[] { 1, 0.25d, 0.8d, 0 },
+                new double[] { 0, 0.50d, 0.4d, 1 },
+                new double[] { 1, 0.00d, 0.4d, 1 },
+            };
+
+            double[][] desiredOutputs =
+            {
+                new double[] { 1.00d / 2, 1.4d / 2},
+                new double[] { 1.75d / 2, 0.6d / 2},
+                new double[] { 0.50d / 2, 0.8d / 2},
+                new double[] { 1.50d / 2, 1.6d / 2},
+                new double[] { 0.25d / 2, 1.8d / 2},
+                new double[] { 2.00d / 2, 1.4d / 2},
+                new double[] { 0.50d / 2, 1.6d / 2},
+                new double[] { 1.25d / 2, 0.8d / 2},
+                new double[] { 0.50d / 2, 1.4d / 2},
+                new double[] { 1.00d / 2, 1.4d / 2},
+            };
+
+            DenseNeuralNetworkBuilder builder = new DenseNeuralNetworkBuilder(inputs[0].Length);
             builder.NewLayers(
                 //new ActivationLayer(3, ActivationFunc.Tanh),
                 //new BatchNormLayer(3, ForwardLayer.ForwardPort.In),
-                new BatchNormLayer(ForwardLayer.ForwardPort.In),
-                new ActivationLayer(3, ActivationFunc.Linear),
-                new BatchNormLayer(ForwardLayer.ForwardPort.In),
-                new ActivationLayer(3, ActivationFunc.Linear),
-                new BatchNormLayer(ForwardLayer.ForwardPort.In),
-                1
+                //new BatchNormLayer(ForwardLayer.ForwardPort.In),
+                new ActivationLayer(5, ActivationFunc.Linear),
+                //new BatchNormLayer(ForwardLayer.ForwardPort.In),
+                new ActivationLayer(4, ActivationFunc.Linear),
+                //new BatchNormLayer(ForwardLayer.ForwardPort.In),
+                new ActivationLayer(desiredOutputs[0].Length, ActivationFunc.Sigmoid)
                 );
 
-            Optimizer optimizer = new AdaGrad(0);
+            Optimizer optimizer = new AdaGrad(0.03d);
+            // Optimizer optimizer = new SGD(0.05d);
             DenseNeuralNetwork network = new DenseNeuralNetwork(builder, optimizer);
 
             //RecurrentNeuralNetwork network = new RecurrentNeuralNetwork(3, 1, 1);
@@ -61,20 +91,12 @@ namespace Test
 
             ForwardResult result;
 
-            double[][] inputs =
-            {
-            };
-
-            double[][] desiredOutputs =
-            {
-            };
-
             dataLength = inputs.Length;
 
             network.BiasAssignForEach(RandomDouble);
             network.WeightAssignForEach(RandomDouble);
 
-            for (int epoch = 0; epoch < 50; epoch++)
+            for (int epoch = 0; epoch < 100000; epoch++)
             {
                 int[] sampleIndexes = SampleIndex(0, dataLength, BATCH_SIZE);
                 //double[][] sampleOutputs = ToDoubleArrays(Sample(desiredOutputs, sampleIndexes), outputInfos);
@@ -87,12 +109,12 @@ namespace Test
 
                 network.GradientDescent(sampleOutputs, result);
 
-                if ((epoch + 1) % 1 == 0 || epoch == 0)
+                if ((epoch + 1) % 10000 == 0 || epoch == 0)
                 {
                     Console.WriteLine(epoch + 1 + " run: ");
                     // Console.Write(LogBatchNorm(network));
-                     Console.Write(ToString(network));
-                    // Console.WriteLine(NonForwardToString(network));
+                    // Console.Write(ToString(network));
+                     Console.WriteLine(NonForwardToString(network));
                     // LogOutput(result);
                     LogCompareOutput(result, sampleOutputs);
 
@@ -114,7 +136,8 @@ namespace Test
             {
                 for (int epoch = 0; epoch < 1; epoch++)
                 {
-                    int[] sampleIndexes = SampleIndex(0, dataLength, BATCH_SIZE);
+                    int[] sampleIndexes = SampleIndex(0, dataLength, 1);
+                    //int[] sampleIndexes = SampleIndex(0, dataLength, BATCH_SIZE);
                     //double[][] sampleOutputs = ToDoubleArrays(Sample(desiredOutputs, sampleIndexes), outputInfos);
 
                     double[][] sampleOutputs = new double[sampleIndexes.Length][];

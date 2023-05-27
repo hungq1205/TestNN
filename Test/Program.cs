@@ -51,15 +51,17 @@ namespace Test
                 //new BatchNormLayer(3, ForwardLayer.ForwardPort.In),
                 //new BatchNormLayer(ForwardLayer.ForwardPort.In),
                 new ActivationLayer(12, ActivationFunc.Linear),
+                new ActivationLayer(12, ActivationFunc.Linear),
                 //new BatchNormLayer(ForwardLayer.ForwardPort.In),
                 //new ActivationLayer(6, ActivationFunc.Linear),
                 //new BatchNormLayer(ForwardLayer.ForwardPort.In),
                 new ActivationLayer(desiredOutputs[0].Length, ActivationFunc.Sigmoid)
                 );
 
+            //Optimizer optimizer = new SGD(0.03d);
+            //Optimizer optimizer = new AdaGrad(0.1d);
             //Optimizer optimizer = new AdaDelta(0.9d);
-            //Optimizer optimizer = new AdaGrad(0.03d);
-            Optimizer optimizer = new SGD(0.03d);
+            Optimizer optimizer = new Momentum();
             DenseNeuralNetwork network = new DenseNeuralNetwork(builder, optimizer);
 
             //RecurrentNeuralNetwork network = new RecurrentNeuralNetwork(3, 1, 1);

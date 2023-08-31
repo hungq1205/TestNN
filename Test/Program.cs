@@ -1,5 +1,6 @@
 ﻿using BFLib.AI;
 using BFLib.Data;
+using BFLib.Utility.Linear;
 using System;
 using System.Reflection;
 using System.Text;
@@ -16,7 +17,31 @@ namespace Test
 
         static void Main(string[] args)
         {
+            //NeuralNetworkTest();
+            LinearTest();
 
+            Console.ReadKey();
+        }
+
+        static void LinearTest()
+        {
+            while (true)
+            {
+                SquareMatrix A = RandomMatrix(2, 1, 7);
+                PrintMatrix(A);
+                Console.WriteLine("\t     x");
+                SquareMatrix B = A.Invert();
+                PrintMatrix(B);
+                Console.WriteLine("\t     =");
+                PrintMatrix(A * B);
+
+                Console.ReadKey(true);
+                Console.WriteLine();
+            }
+        }
+
+        static void NeuralNetworkTest()
+        {
             double[][] inputs =
             {
                 new double[] { 0, 1.00d, 0.4d, 1 },
@@ -119,7 +144,7 @@ namespace Test
                     Console.WriteLine(epoch + 1 + " run: ");
                     // Console.Write(LogBatchNorm(network));
                     // Console.Write(ToString(network));
-                     Console.WriteLine(NonForwardToString(network));
+                    Console.WriteLine(NonForwardToString(network));
                     // LogOutput(result);
                     LogCompareOutput(result, sampleOutputs);
 
@@ -175,6 +200,46 @@ namespace Test
                     }
                 }
                 Console.ReadKey();
+            }
+        }
+
+        static SquareMatrix RandomMatrix(int dim, double min = 0, double max = 1)
+        {
+            double[][] content = new double[dim][];
+
+            for (int i = 0; i < dim; i++) {
+                content[i] = new double[dim];
+
+                for (int j = 0; j < dim; j++)
+                    content[i][j] = rand.NextDouble() * (max - min) + min;
+            }
+
+            return content;
+        }
+
+        static SquareMatrix RandomMatrix(int dim, int min = 0, int max = 2)
+        {
+            double[][] content = new double[dim][];
+
+            for (int i = 0; i < dim; i++) {
+                content[i] = new double[dim];
+
+                for (int j = 0; j < dim; j++)
+                    content[i][j] = rand.Next(min, max);
+            }
+
+            return content;
+        }
+
+        static void PrintMatrix(SquareMatrix matrix)
+        {
+            for (int i = 0; i < matrix.dim; i++)
+            {
+                Console.Write("|");
+                Console.Write("{0,5: #0.0;-#0.0; #0.0}", matrix.content[i][0]);
+                for (int j = 1; j < matrix.dim; j++)
+                    Console.Write(" {0,5: #0.0;-#0.0; #0.0}", matrix.content[i][j]);
+                Console.Write(" |\n");
             }
         }
 

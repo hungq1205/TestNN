@@ -27,15 +27,16 @@ namespace Test
         {
             while (true)
             {
-                SquareMatrix A = RandomMatrix(2, 1, 7);
+                SquareMatrix A = RandomMatrix(4, 1, 7);
                 PrintMatrix(A);
-                Console.WriteLine("\t     x");
+                Console.WriteLine("\tx");
                 SquareMatrix B = A.Invert();
                 PrintMatrix(B);
-                Console.WriteLine("\t     =");
+                Console.WriteLine("\t=");
                 PrintMatrix(A * B);
 
                 Console.ReadKey(true);
+                Console.WriteLine();
                 Console.WriteLine();
             }
         }

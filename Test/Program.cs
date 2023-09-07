@@ -27,13 +27,24 @@ namespace Test
         {
             while (true)
             {
-                SquareMatrix A = RandomMatrix(4, 1, 7);
+                // SquareMatrix A = SquareMatrix.Diag(2, 3, 6, 4);
+                SquareMatrix A = RandomMatrix(4, 1, 6);
+                Vector b = RandomVector(4, 1, 6);
+                Vector X = A.Invert() * b;
+                Vector cg;
+
+                Console.WriteLine("A: ");
                 PrintMatrix(A);
-                Console.WriteLine("\tx");
-                SquareMatrix B = A.Invert();
-                PrintMatrix(B);
-                Console.WriteLine("\t=");
-                PrintMatrix(A * B);
+                Console.WriteLine("A * At: ");
+                PrintMatrix(A.Transpose * A);
+                Console.WriteLine("b: ");
+                PrintVector(b);
+                Console.WriteLine("X: ");
+                PrintVector(X);
+
+                cg = LinearMethod.CGMethod(A, b);
+                Console.WriteLine("X (CG): ");
+                PrintVector(cg);
 
                 Console.ReadKey(true);
                 Console.WriteLine();
@@ -232,6 +243,26 @@ namespace Test
             return content;
         }
 
+        static Vector RandomVector(int dim, double min = 0, double max = 1)
+        {
+            double[] content = new double[dim];
+
+            for (int i = 0; i < dim; i++)
+                    content[i] = rand.NextDouble() * (max - min) + min;
+
+            return content;
+        }
+
+        static Vector RandomVector(int dim, int min = 0, int max = 2)
+        {
+            double[] content = new double[dim];
+
+            for (int i = 0; i < dim; i++)
+                    content[i] = rand.Next(min, max);
+
+            return content;
+        }
+
         static void PrintMatrix(SquareMatrix matrix)
         {
             for (int i = 0; i < matrix.dim; i++)
@@ -242,6 +273,12 @@ namespace Test
                     Console.Write(" {0,5: #0.0;-#0.0; #0.0}", matrix.content[i][j]);
                 Console.Write(" |\n");
             }
+        }
+
+        static void PrintVector(Vector vector)
+        {
+            for (int i = 0; i < vector.dim; i++)
+                Console.WriteLine("|{0,5: #0.0;-#0.0; #0.0} |", vector.content[i]);
         }
 
         static int[] SampleIndex(int min, int max, int batchSize, int reservedPoint = int.MinValue)

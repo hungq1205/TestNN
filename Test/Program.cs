@@ -32,7 +32,7 @@ namespace Test
                 Vector b = RandomVector(4, 1, 6);
                 Vector X = A.Invert() * b;
                 Vector cg;
-                (SquareMatrix, SquareMatrix) productLU = LinearMethod.LUFac(A);
+                (SquareMatrix, SquareMatrix) productLU = LinearMethod.IncompleteLUFac(A);
 
                 Console.WriteLine("A: ");
                 PrintMatrix(A);

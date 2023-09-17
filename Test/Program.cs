@@ -29,23 +29,27 @@ namespace Test
             {
                 // SquareMatrix A = SquareMatrix.Diag(2, 3, 6, 4);
                 SquareMatrix A = RandomMatrix(4, 1, 6);
-                A = A * A.Transpose;
                 Vector b = RandomVector(4, 1, 6);
                 Vector X = A.Invert() * b;
                 Vector cg;
+                (SquareMatrix, SquareMatrix) productLU = LinearMethod.LUFac(A);
 
                 Console.WriteLine("A: ");
                 PrintMatrix(A);
+                Console.WriteLine("L: ");
+                PrintMatrix(productLU.Item1);
+                Console.WriteLine("U: ");
+                PrintMatrix(productLU.Item2);
                 Console.WriteLine("A * At: ");
-                PrintMatrix(A * A.Transpose);
-                Console.WriteLine("b: ");
-                PrintVector(b);
-                Console.WriteLine("X: ");
-                PrintVector(X);
+                PrintMatrix(productLU.Item1 * productLU.Item2);
+                //Console.WriteLine("b: ");
+                //PrintVector(b);
+                //Console.WriteLine("X: ");
+                //PrintVector(X);
 
-                cg = LinearMethod.CGMethod(A, b);
-                Console.WriteLine("X (CG): ");
-                PrintVector(cg);
+                //cg = LinearMethod.CGMethod(A, b);
+                //Console.WriteLine("X (CG): ");
+                //PrintVector(cg);
 
                 Console.ReadKey(true);
                 Console.WriteLine();

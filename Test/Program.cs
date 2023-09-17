@@ -29,6 +29,7 @@ namespace Test
             {
                 // SquareMatrix A = SquareMatrix.Diag(2, 3, 6, 4);
                 SquareMatrix A = RandomMatrix(4, 1, 6);
+                A = A * A.Transpose;
                 Vector b = RandomVector(4, 1, 6);
                 Vector X = A.Invert() * b;
                 Vector cg;
@@ -36,7 +37,7 @@ namespace Test
                 Console.WriteLine("A: ");
                 PrintMatrix(A);
                 Console.WriteLine("A * At: ");
-                PrintMatrix(A.Transpose * A);
+                PrintMatrix(A * A.Transpose);
                 Console.WriteLine("b: ");
                 PrintVector(b);
                 Console.WriteLine("X: ");
